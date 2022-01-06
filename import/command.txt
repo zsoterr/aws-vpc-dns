@@ -1,0 +1,2 @@
+VPC_ID=Your_VPC_ID
+terraform import aws_vpc.imported_vpc $VPC_ID
