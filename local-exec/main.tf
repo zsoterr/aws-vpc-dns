@@ -19,13 +19,15 @@ data "aws_vpc" "aws_vpc_dns" {
   id = var.vpc_id
 }
 
-
 resource "null_resource" "aws_vpc_dns_local" {
-provisioner "local-exec" {
-  command = <<EOT
-  command = aws ec2 modify-vpc-attribute --vpc-id ${data.aws_vpc.aws_vpc_dns.id} --enable-dns-support
-  command = aws ec2 modify-vpc-attribute --vpc-id ${data.aws_vpc.aws_vpc_dns.id} --enable-dns-hostnames
-  EOT
-  interpreter = ["/bin/bash", "-c"]
- }
+  provisioner "local-exec" {
+    command = <<EOT
+    if  [ $dnssupport != "true" ]; then aws ec2 modify-vpc-attribute --vpc-id ${data.aws_vpc.aws_vpc_dns.id} --enable-dns-support; fi
+    if  [ $dnshostnames != "true" ]; then aws ec2 modify-vpc-attribute --vpc-id ${data.aws_vpc.aws_vpc_dns.id} --enable-dns-hostnames; fi
+       EOT
+    environment = {
+  dnssupport= data.aws_vpc.aws_vpc_dns.enable_dns_support
+  dnshostnames = data.aws_vpc.aws_vpc_dns.enable_dns_hostnames
+    }
+  }
 }
